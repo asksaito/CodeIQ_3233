@@ -12,8 +12,8 @@ namespace CodeIQ_3233
         {;
             //string[] input = { "3", "6" }; // 10
             //string[] input = { "4", "10" }; // 84
-            //string[] input = { "5", "20" }; // ?
-            //string[] input = { "10", "30" }; // ?
+            //string[] input = { "5", "20" }; // 2826
+            //string[] input = { "10", "30" }; // 8337880
             //string[] input = { "40", "49" }; // ?
             string[] input = Console.ReadLine().Split(' ');
 
@@ -36,6 +36,11 @@ namespace CodeIQ_3233
             }
             for (int moveCount = lowestMoveCount; moveCount <= distance - remainCount + 1; moveCount++)
             {
+                if(moveCount > 9)
+                {
+                    break;
+                }
+
                 //if (nextLeft)
                 //{
                 //    // 左に回す
