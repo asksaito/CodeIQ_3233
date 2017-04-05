@@ -14,8 +14,9 @@ namespace CodeIQ_3233
             //string[] input = { "4", "10" }; // 84
             //string[] input = { "5", "20" }; // 2826
             //string[] input = { "10", "30" }; // 8337880
-            //string[] input = { "40", "49" }; // ?
-            string[] input = Console.ReadLine().Split(' ');
+            string[] input = { "40", "49" }; // 1677106600 ? (2:30)
+            //string[] input = { "9", "18" }; // 24301
+            //string[] input = Console.ReadLine().Split(' ');
 
             int count = int.Parse(input[0]);    // m
             int distance = int.Parse(input[1]); // n
@@ -29,51 +30,41 @@ namespace CodeIQ_3233
         {
             int patternCount = 0;
 
+            //System.Diagnostics.Debug.Assert(remainCount <= distance);
+
+            if (remainCount == distance)
+            {
+                // ダイヤル回転回数と総移動距離が同じ場合、必ず1パターンに定まる
+                return 1;
+            }
+
+            // 最小移動距離
             int lowestMoveCount = distance - ((remainCount - 1) * 9);
             if(lowestMoveCount <= 1)
             {
                 lowestMoveCount = 1;
             }
-            for (int moveCount = lowestMoveCount; moveCount <= distance - remainCount + 1; moveCount++)
+
+            // 最大移動距離
+            int highestMoveCount = distance - remainCount + 1;
+            if(highestMoveCount > 9)
             {
-                if(moveCount > 9)
-                {
-                    break;
-                }
+                highestMoveCount = 9;
+            }
 
-                //if (nextLeft)
-                //{
-                //    // 左に回す
-                //    current = turnLeft(current, moveCount);
-                //}
-                //else
-                //{
-                //    // 右に回す
-                //    current = turnRight(current, moveCount);
-                //}
+            if(remainCount <= 2)
+            {
+                return highestMoveCount - lowestMoveCount + 1;
+            }
 
-                if (remainCount > 2)
-                {
-                    // 再帰
-                    patternCount += CalcLockPattern(remainCount - 1, distance - moveCount);
-                }
-                else
-                {
-                    patternCount++;
-                }
+            for (int moveCount = lowestMoveCount; moveCount <= highestMoveCount; moveCount++)
+            {
+                // 再帰呼び出し
+                patternCount += CalcLockPattern(remainCount - 1, distance - moveCount);
             }
 
             return patternCount;
         }
-
-        //private static int turnLeft(int initial, int moveCount)
-        //{
-        //    return (initial + moveCount) % 10;
-        //}
-
-        //private static int turnRight(int initial, int moveCount)
-        //{
-        //    return (initial + 50 - moveCount) % 50;
-        //}
+        
     }
 }
