@@ -8,96 +8,51 @@ namespace CodeIQ_3233
 {
     class Program
     {
+        /// <summary>
+        /// 現在のパターンを保持しておく一時領域
+        /// </summary>
+        private static int[] patternTemp = null;
+        /// <summary>
+        /// 目的の合計値を保持しておく一時領域
+        /// </summary>
+        private static int totalDistance = 0;
+
         static void Main(string[] args)
         {
-            ;
             //string[] input = { "3", "6" }; // 10
             //string[] input = { "4", "10" }; // 84
             //string[] input = { "5", "20" }; // 2826
             //string[] input = { "10", "30" }; // 8337880
-            string[] input = { "40", "49" }; // 1677106600 ? (2:30)
+            string[] input = { "40", "49" }; // 1677106600
             //string[] input = { "9", "18" }; // 24301
+
+            // 標準入力からインプットを取得
             //string[] input = Console.ReadLine().Split(' ');
 
             int count = int.Parse(input[0]);    // m
             int distance = int.Parse(input[1]); // n
 
-            currentPattern = new int[count];
-            targetDistance = distance;
+            // パターン作成一時領域を確保しておく
+            patternTemp = new int[count];
+            // 目的の合計値を保持しておく
+            totalDistance = distance;
 
-            //int patternCount = CalcLockPattern(count, distance);
-            //CalcLockPatternList(count, distance, "{");
-            long patternCount = CalcPattern(count, distance);
+            long result = CalcPatternCount(count, distance);
 
-            Console.WriteLine(patternCount.ToString());
-            //foreach (string pat in patternList)
-            //{
-            //    Console.WriteLine(pat);
-            //}
+            // 標準出力に結果出力
+            Console.WriteLine(result.ToString());
         }
 
-        private static int CalcLockPattern(int remainCount, int distance)
-        {
-            int patternCount = 0;
-
-            //System.Diagnostics.Debug.Assert(remainCount <= distance);
-
-            if (remainCount == distance)
-            {
-                // ダイヤル回転回数と総移動距離が同じ場合、必ず1パターンに定まる
-                return 1;
-            }
-
-            // 最小移動距離
-            int lowestMoveCount = distance - ((remainCount - 1) * 9);
-            if (lowestMoveCount <= 1)
-            {
-                lowestMoveCount = 1;
-            }
-
-            // 最大移動距離
-            int highestMoveCount = distance - remainCount + 1;
-            if (highestMoveCount > 9)
-            {
-                highestMoveCount = 9;
-            }
-
-            if (remainCount <= 2)
-            {
-                return highestMoveCount - lowestMoveCount + 1;
-            }
-
-            if (distance <= 10)
-            {
-                //int patternSum = 0;
-                int pattern = distance - remainCount + 1;
-                for (int i = pattern; i > 0; i--)
-                {
-                    patternCount += i;
-                    for (int j = i - 1; j > 0; j--)
-                    {
-                        patternCount += j;
-                    }
-                }
-
-                return patternCount;
-            }
-
-            for (int moveCount = lowestMoveCount; moveCount <= highestMoveCount; moveCount++)
-            {
-                // 再帰呼び出し
-                patternCount += CalcLockPattern(remainCount - 1, distance - moveCount);
-            }
-
-            return patternCount;
-        }
-
-        //private static void CalcLockPatternList(int remainCount, int distance, string pattern)
+        //private static int CalcLockPattern(int remainCount, int distance)
         //{
+        //    int patternCount = 0;
 
-        //    if (remainCount == 1)
+        //    //System.Diagnostics.Debug.Assert(remainCount <= distance);
+
+        //    if (remainCount == distance)
         //    {
-        //        patternList.Add(pattern + " " + distance.ToString() + " }");
+        //        // ダイヤル回転回数と総移動距離が同じ場合、必ず1パターンに定まる
+        //        return 1;
         //    }
 
         //    // 最小移動距離
@@ -114,80 +69,111 @@ namespace CodeIQ_3233
         //        highestMoveCount = 9;
         //    }
 
+        //    if (remainCount <= 2)
+        //    {
+        //        return highestMoveCount - lowestMoveCount + 1;
+        //    }
 
         //    for (int moveCount = lowestMoveCount; moveCount <= highestMoveCount; moveCount++)
         //    {
         //        // 再帰呼び出し
-        //        CalcLockPatternList(remainCount - 1, distance - moveCount, pattern + " " + moveCount.ToString());
-
+        //        patternCount += CalcLockPattern(remainCount - 1, distance - moveCount);
         //    }
 
+        //    return patternCount;
         //}
 
-        private static long CalcPattern(int count, int distance)
+        /// <summary>
+        /// パターン数を計算する（再帰処理）
+        /// </summary>
+        /// <param name="count">残りのダイヤル回転回数</param>
+        /// <param name="distance">残りのダイヤル回転距離</param>
+        /// <returns></returns>
+        private static long CalcPatternCount(int count, int distance)
         {
             long patternCnt = 0;
-            int idx = currentPattern.Length - count;
+            int idx = patternTemp.Length - count;
 
             if (count == 1)
             {
-                currentPattern[idx] = distance;
-                if (currentPattern.Sum() == targetDistance)
+                if (distance <= 9)
                 {
-                    patternCnt = CalcPermutation(currentPattern);
+                    // 最後の数字
+                    patternTemp[idx] = distance;
+                    if (patternTemp.Sum() == totalDistance) // 作成したパターンの合計値が目的の合計値の場合
+                    {
+                        // その数字のパターンで取り得るすべての重複順列を計算する。
+                        patternCnt = CalcPermutation(patternTemp);
+                    }
                 }
-                currentPattern[idx] = 0;
             }
             else
             {
-                // 最小移動距離
-                int lowestMoveCount = distance - ((count - 1) * 9);
-                if (lowestMoveCount <= 1)
-                {
-                    lowestMoveCount = 1;
-                }
+                //// 最小移動距離を計算
+                //int lowestMoveCount = distance - ((count - 1) * 9);
+                //if (lowestMoveCount <= 1)
+                //{
+                //    lowestMoveCount = 1;
+                //}
 
+                //if (idx > 0)
+                //{
+                //    if (patternTemp[idx - 1] > lowestMoveCount)
+                //    {
+                //        // パターン領域のひとつ前の値より大きい値のみを対象とする
+                //        lowestMoveCount = patternTemp[idx - 1];
+                //    }
+                //}
+
+                //// 最大移動距離を計算
+                //int highestMoveCount = distance - count + 1;
+                //if (highestMoveCount > 9)
+                //{
+                //    // 9が最大値
+                //    highestMoveCount = 9;
+                //}
+                
+                int lowestNum = 1;    // 組み合わせ候補の最小値
+                int highestNum = 9;   // 組み合わせ候補の最大値
                 if (idx > 0)
                 {
-                    if (currentPattern[idx - 1] > lowestMoveCount)
+                    if (patternTemp[idx - 1] > lowestNum)
                     {
-                        lowestMoveCount = currentPattern[idx - 1];
+                        // パターン領域のひとつ前の値より大きい値を組み合わせの対象とする
+                        lowestNum = patternTemp[idx - 1];
                     }
                 }
 
-                // 最大移動距離
-                int highestMoveCount = distance - count + 1;
-                if (highestMoveCount > 9)
-                {
-                    highestMoveCount = 9;
-                }
 
-
-                for (int moveCount = lowestMoveCount; moveCount <= highestMoveCount; moveCount++)
+                for (int num = lowestNum; num <= highestNum; num++)
                 {
-                    currentPattern[idx] = moveCount;
-                    if (currentPattern[idx] > distance - moveCount)
+                    // 組み合わせパターンを作成
+                    patternTemp[idx] = num;
+                    if (patternTemp[idx] > distance - num)
                     {
-                        currentPattern[idx] = 0;
+                        // 組み合わせパターンが作成出来なくなったら途中で打ち切る
                         break;
                     }
 
 
                     // 再帰呼び出し
-                    patternCnt += CalcPattern(count - 1, distance - moveCount);
+                    patternCnt += CalcPatternCount(count - 1, distance - num);
                 }
             }
+
+            // 最後の数字を削除（一時領域の再利用のため）
+            patternTemp[idx] = 0;
 
             return patternCnt;
         }
 
+        /// <summary>
+        /// 重複順列の組み合わせ数の計算
+        /// </summary>
+        /// <param name="pattern">組み合わせパターン</param>
+        /// <returns>組み合わせ数</returns>
         private static long CalcPermutation(int[] pattern)
         {
-            //foreach (int p in pattern) {
-            //    Console.Write(p + " ");
-            //}
-            //Console.WriteLine("");
-
             int num1 = 0;
             int num2 = 0;
             int num3 = 0;
@@ -234,43 +220,52 @@ namespace CodeIQ_3233
                         break;
                 }
             }
-            //int maxNum = Math.Max(Math.Max(Math.Max(Math.Max(Math.Max(Math.Max(Math.Max(Math.Max(num1, num2),num3),num4),num5),num6),num7),num8),num9);
+
+            // 階乗の計算時間を抑えるために、あらかじめ一番重複が多いものを選んでおく（ソートの結果の先頭が一番大きな重複数）
             List<int> sort = new List<int>() { num1, num2, num3, num4, num5, num6, num7, num8, num9 };
             sort.Sort();
             sort.Reverse();
+            
+            int factorialCalcCount = pattern.Count() - sort[0]; // 階乗の計算量を抑えるための工夫
 
-            // n! / r1! + r2!...
-            int nCount = pattern.Count() - sort[0];
-
-            long permutationResult = Factorial(pattern.Count(), nCount);
+            // 重複順列の計算！ （n! / r1! + r2! ... r9!）
+            long permutationResult = Factorial(pattern.Count(), factorialCalcCount);
             for (int i = 1; i < sort.Count; i++)
             {
+                // 重複分をさらに除去していく
                 permutationResult /= Factorial(sort[i], sort[i]);
             }
 
+            // 結果
             return permutationResult;
         }
 
-        private static long Factorial(int num, int cnt)
+        /// <summary>
+        /// 階乗の計算
+        /// </summary>
+        /// <param name="num">計算対象の数字</param>
+        /// <param name="calcCnt">階乗の計算を途中で打ち切るためのカウンタ</param>
+        /// <returns></returns>
+        private static long Factorial(int num, int calcCnt)
         {
-            if (cnt == 0)
-            {
-                return 1L;
-            }
-
             if (num == 0)
             {
+                // 0! = 1
                 return 1L;
             }
             else
             {
-                return num * Factorial(num - 1, cnt - 1);
+                if (calcCnt <= 0)
+                {
+                    // 階乗の計算打ち切り
+                    return 1L;
+                }
+                else
+                {
+                    // n * (n-1)
+                    return num * Factorial(num - 1, calcCnt - 1);
+                }
             }
         }
-
-        //private static List<string> patternList = new List<string>();
-        private static int[] currentPattern = null;
-        //private static int idx = 0;
-        private static int targetDistance = 0;
     }
 }
